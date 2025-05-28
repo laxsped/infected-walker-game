@@ -1,0 +1,53 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!319 &31900000
+AvatarMask:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: zombie
+  m_Mask: 00000000010000000100000000000000000000000100000001000000010000000100000000000000000000000100000001000000
+  m_Elements:
+  - m_Path: 
+    m_Weight: 1
+  - m_Path: hips
+    m_Weight: 1
+  - m_Path: hips/chest
+    m_Weight: 1
+  - m_Path: hips/chest/leg.L
+    m_Weight: 0
+  - m_Path: hips/chest/leg.L/leg.L_end
+    m_Weight: 1
+  - m_Path: hips/chest/leg.R
+    m_Weight: 0
+  - m_Path: hips/chest/leg.R/leg.R_end
+    m_Weight: 1
+  - m_Path: hips/chest/spine01
+    m_Weight: 0
+  - m_Path: hips/chest/spine01/spine02
+    m_Weight: 0
+  - m_Path: hips/chest/spine01/spine02/spine02_end
+    m_Weight: 0
+  - m_Path: hips/head
+    m_Weight: 1
+  - m_Path: hips/head/head_end
+    m_Weight: 1
+  - m_Path: hips/startarm.L
+    m_Weight: 1
+  - m_Path: hips/startarm.L/arm.L
+    m_Weight: 1
+  - m_Path: hips/startarm.L/arm.L/hand.L
+    m_Weight: 1
+  - m_Path: hips/startarm.L/arm.L/hand.L/hand.L_end
+    m_Weight: 1
+  - m_Path: hips/startarm.R
+    m_Weight: 1
+  - m_Path: hips/startarm.R/arm.R
+    m_Weight: 1
+  - m_Path: hips/startarm.R/arm.R/hand.R
+    m_Weight: 1
+  - m_Path: hips/startarm.R/arm.R/hand.R/hand.R_end
+    m_Weight: 1
+  - m_Path: zombie
+    m_Weight: 0
