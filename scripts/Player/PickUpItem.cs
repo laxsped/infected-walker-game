@@ -12,11 +12,11 @@ public class ItemPickup : MonoBehaviour
             Collider[] hits = Physics.OverlapSphere(transform.position, pickupRange);
             foreach (var hit in hits)
             {
-                Debug.Log("Нашёл объект: " + hit.name + ", тег: " + hit.tag);
-                if (hit.CompareTag("Pickup"))
+                Debug.Log("Found object: " + hit.name + ", tag: " + hit.tag);
+                if (hit.CompareTag("Pickup") && hit.name.Contains("ShotgunPickup"))
                 {
-                    Debug.Log("Подбираю " + hit.name);
-                    WeaponManager.Instance.EquipWeaponByName(hit.name);
+                    Debug.Log("Picking up Shotgun!");
+                    WeaponManager.Instance.EquipWeapon(3); // Переключаем на дробовик
                     Destroy(hit.gameObject);
                     break;
                 }

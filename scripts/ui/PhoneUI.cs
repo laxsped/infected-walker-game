@@ -112,34 +112,62 @@ public class PhoneShopUI : MonoBehaviour
                 Debug.Log("Куплен компас — заглушка");
                 break;
 
-            case 1:
+            case 1: // Дробовик
                 if (isShotgunPurchased)
                 {
-                    sellerMessageText.text = "you buyed it!";
+                    sellerMessageText.text = "You already bought it!";
+                    Debug.Log("Shotgun already purchased!");
                     return;
                 }
 
                 HumanitySystem humanity = FindObjectOfType<HumanitySystem>();
+                if (humanity == null)
+                {
+                    Debug.LogError("HumanitySystem not found!");
+                    sellerMessageText.text = "Error: No humanity system!";
+                    return;
+                }
 
                 if (humanity != null && humanity.SpendHumanity(210))
                 {
                     isShotgunPurchased = true;
-                    sellerMessageText.text = "destroy they!";
-                    Debug.Log("Куплен дробовик!");
+                    sellerMessageText.text = "Destroy them!";
+                    Debug.Log("Shotgun purchased! Spawning...");
 
                     if (shotgunPickupPrefab != null)
                     {
                         Vector3 spawnPosition = playerTransform.position + Vector3.up * 5f;
-                        Instantiate(shotgunPickupPrefab, spawnPosition, Quaternion.identity);
+                        Debug.Log("Spawning shotgun at: " + spawnPosition);
+                        GameObject droppedShotgun = Instantiate(shotgunPickupPrefab, spawnPosition, Quaternion.identity);
+                        if (droppedShotgun != null)
+                        {
+                            droppedShotgun.SetActive(true); // Явно активируем объект
+                            Rigidbody rb = droppedShotgun.GetComponent<Rigidbody>();
+                            if (rb != null)
+                            {
+                                rb.useGravity = true;
+                                rb.AddForce(Vector3.down * 5f); // Даём толчок вниз
+                                Debug.Log("Shotgun spawned with ID: " + droppedShotgun.GetInstanceID() + ", Active: " + droppedShotgun.activeSelf);
+                            }
+                            else
+                            {
+                                Debug.LogError("Rigidbody not found on shotgun prefab!");
+                            }
+                        }
+                        else
+                        {
+                            Debug.LogError("Failed to instantiate shotgun!");
+                        }
                     }
                     else
                     {
-                        Debug.LogError("shotgunPickupPrefab не назначен!");
+                        Debug.LogError("shotgunPickupPrefab not assigned!");
                     }
                 }
                 else
                 {
-                    sellerMessageText.text = "Недостаточно человечности!";
+                    sellerMessageText.text = "Not enough humanity!";
+                    Debug.Log("Not enough humanity to buy shotgun.");
                 }
                 break;
         }

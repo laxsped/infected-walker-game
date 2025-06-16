@@ -18,7 +18,7 @@ public class WeaponManager : MonoBehaviour
         EquipWeapon(2); // старт с ножа
 
         // 🧱 Спрятать дробовик в начале
-        weapons[2].SetActive(false);
+        if (!isShotgunPurchased) weapons[3].SetActive(false);
     }
 
     void Update()
