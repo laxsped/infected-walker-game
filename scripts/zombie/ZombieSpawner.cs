@@ -7,30 +7,26 @@ using UnityEngine.AI;
 public class ZombieSpawner : MonoBehaviour
 {
     public GameObject zombiePrefab;
-    public float spawnProbability = 0.5f; // Вероятность, что на чанк появится зомби (0-1)
-    public NavMeshSurface navMeshSurface; // Ссылка на NavMeshSurface для проверки
+    public float spawnProbability = 0.8f; // Шанс 80%
+    public NavMeshSurface navMeshSurface; // Ссылка на NavMeshSurface
+    private Transform player; // Добавляем ссылку на игрока
 
     private Dictionary<Vector2Int, GameObject> spawnedZombies = new();
-    private Queue<(Vector2Int, GameObject)> spawnQueue = new(); // Очередь для спавна зомби
-    private Queue<GameObject> zombiePool = new(); // Пул зомби
-    private bool isSpawning = false; // Флаг, чтобы не запускать несколько корутин
+    private Queue<(Vector2Int, GameObject)> spawnQueue = new();
+    private Queue<GameObject> zombiePool = new();
+    private bool isSpawning = false;
 
     void Start()
     {
-        // Запускаем корутину для спавна
+        // Находим игрока
+        player = GameObject.FindGameObjectWithTag("Player").transform;
         StartCoroutine(SpawnZombiesRoutine());
     }
 
-    // Вызывать, когда чанк загружается и готов
     public void TrySpawnZombie(Vector2Int chunkCoord, GameObject chunk)
     {
-        // Если зомби уже есть в этом чанке - ничего не делаем
         if (spawnedZombies.ContainsKey(chunkCoord)) return;
-
-        // Проверяем вероятность
         if (Random.value > spawnProbability) return;
-
-        // Добавляем в очередь на спавн
         spawnQueue.Enqueue((chunkCoord, chunk));
     }
 
@@ -43,10 +39,8 @@ public class ZombieSpawner : MonoBehaviour
                 isSpawning = true;
                 var (chunkCoord, chunk) = spawnQueue.Dequeue();
 
-                // Проверяем, что NavMesh готов
                 yield return WaitForNavMesh();
 
-                // Найдём точку спавна в чанке (метка "ZombieSpawn")
                 Transform spawnPoint = null;
                 foreach (var t in chunk.GetComponentsInChildren<Transform>())
                 {
@@ -57,54 +51,57 @@ public class ZombieSpawner : MonoBehaviour
                     }
                 }
 
-                if (spawnPoint == null)
+                if (spawnPoint != null)
                 {
-                    Debug.LogWarning($"Нет точки спавна для зомби в чанке {chunkCoord}");
-                    isSpawning = false;
-                    continue;
+                    UnityEngine.AI.NavMeshHit hit;
+                    if (UnityEngine.AI.NavMesh.SamplePosition(spawnPoint.position, out hit, 5f, UnityEngine.AI.NavMesh.AllAreas))
+                    {
+                        GameObject zombie;
+                        if (zombiePool.Count > 0)
+                        {
+                            zombie = zombiePool.Dequeue();
+                            zombie.transform.position = hit.position;
+                            zombie.SetActive(true);
+                        }
+                        else
+                        {
+                            zombie = Instantiate(zombiePrefab, hit.position, Quaternion.identity);
+                        }
+
+                        // Оптимизация AI: отключаем, если зомби слишком далеко
+                        ZombieAI ai = zombie.GetComponent<ZombieAI>();
+                        if (ai != null && Vector3.Distance(player.position, hit.position) > 50f)
+                        {
+                            ai.enabled = false; // Выключаем AI для дальних зомби
+                        }
+
+                        spawnedZombies[chunkCoord] = zombie;
+                    }
                 }
 
-                // Спавним зомби
-                GameObject zombie;
-                if (zombiePool.Count > 0)
-                {
-                    zombie = zombiePool.Dequeue();
-                    zombie.transform.position = spawnPoint.position;
-                    zombie.transform.rotation = Quaternion.identity;
-                    zombie.SetActive(true);
-                }
-                else
-                {
-                    zombie = Instantiate(zombiePrefab, spawnPoint.position, Quaternion.identity);
-                }
-
-                spawnedZombies[chunkCoord] = zombie;
                 isSpawning = false;
-
-                yield return null; // Ждём следующий кадр
+                yield return null;
             }
             else
             {
-                yield return null; // Если очередь пуста, ждём кадр
+                yield return null;
             }
         }
     }
 
-    // Удаляем зомби, если чанк выгружается
     public void ClearZombiesInChunk(Vector2Int chunkCoord)
     {
         if (spawnedZombies.TryGetValue(chunkCoord, out var zombie))
         {
             zombie.SetActive(false);
-            zombiePool.Enqueue(zombie); // Добавляем в пул вместо уничтожения
+            zombiePool.Enqueue(zombie);
             spawnedZombies.Remove(chunkCoord);
         }
     }
 
-    // Ждём, пока NavMesh будет готов
     IEnumerator WaitForNavMesh()
     {
-        int maxFramesToWait = 50; // Максимум 50 кадров (примерно 1 секунда на 60 FPS)
+        int maxFramesToWait = 100; // Увеличено до 100 кадров
         for (int i = 0; i < maxFramesToWait; i++)
         {
             if (navMeshSurface.navMeshData != null)
@@ -113,6 +110,6 @@ public class ZombieSpawner : MonoBehaviour
             }
             yield return null;
         }
-        Debug.LogWarning("NavMesh не готов после ожидания, пропускаем спавн");
+        Debug.LogWarning("NavMesh не готов после ожидания");
     }
 }

@@ -5,7 +5,7 @@ public class WeaponManager : MonoBehaviour
     public static WeaponManager Instance;
 
     public GameObject[] weapons;
-    public bool isShotgunPurchased = false; // дробовик под индексом 3
+    public bool isShotgunPurchased = false; // Дробовик под индексом 3
     private int currentWeaponIndex = 0;
 
     void Awake()
@@ -15,9 +15,8 @@ public class WeaponManager : MonoBehaviour
 
     void Start()
     {
-        EquipWeapon(2); // старт с ножа
-
-        // 🧱 Спрятать дробовик в начале
+        EquipWeapon(2); // Старт с ножа
+        // Прячем дробовик, если не куплен
         if (!isShotgunPurchased) weapons[3].SetActive(false);
     }
 
@@ -43,7 +42,6 @@ public class WeaponManager : MonoBehaviour
 
         currentWeaponIndex = index;
 
-        // Телефон включён?
         if (index == 1)
         {
             FindObjectOfType<PhoneShopUI>()?.OnPhoneEquipped();
@@ -52,21 +50,5 @@ public class WeaponManager : MonoBehaviour
         {
             FindObjectOfType<PhoneShopUI>()?.OnPhoneUnequipped();
         }
-    }
-
-
-    // 🔥 Новый метод для выбора оружия по имени
-    public void EquipWeaponByName(string weaponName)
-    {
-        for (int i = 0; i < weapons.Length; i++)
-        {
-            if (weapons[i].name == weaponName)
-            {
-                EquipWeapon(i);
-                return;
-            }
-        }
-
-        Debug.LogWarning("Оружие с именем '" + weaponName + "' не найдено.");
     }
 }

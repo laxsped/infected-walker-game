@@ -22,8 +22,6 @@ public class PhoneShopUI : MonoBehaviour
         "Points to the nearest supply house. Breaks after time.",
         "Devastating, but costs a LOT of humanity per shot."
     };
-    public GameObject shotgunPickupPrefab; // assign в инспекторе
-    public Transform playerTransform; // ссылка на игрока (можно задать в инспекторе)
 
     [Header("Delays")]
     public float canvasActivationDelay = 0.3f;
@@ -115,7 +113,7 @@ public class PhoneShopUI : MonoBehaviour
             case 1: // Дробовик
                 if (isShotgunPurchased)
                 {
-                    sellerMessageText.text = "You already bought it!";
+                    sellerMessageText.text = "you already bought it!";
                     Debug.Log("Shotgun already purchased!");
                     return;
                 }
@@ -131,52 +129,20 @@ public class PhoneShopUI : MonoBehaviour
                 if (humanity != null && humanity.SpendHumanity(210))
                 {
                     isShotgunPurchased = true;
-                    sellerMessageText.text = "Destroy them!";
-                    Debug.Log("Shotgun purchased! Spawning...");
+                    sellerMessageText.text = "destroy them!";
+                    Debug.Log("Shotgun purchased! Activating in inventory...");
 
-                    if (shotgunPickupPrefab != null)
-                    {
-                        Vector3 spawnPosition = playerTransform.position + Vector3.up * 5f;
-                        Debug.Log("Spawning shotgun at: " + spawnPosition);
-                        GameObject droppedShotgun = Instantiate(shotgunPickupPrefab, spawnPosition, Quaternion.identity);
-                        if (droppedShotgun != null)
-                        {
-                            droppedShotgun.SetActive(true); // Явно активируем объект
-                            Rigidbody rb = droppedShotgun.GetComponent<Rigidbody>();
-                            if (rb != null)
-                            {
-                                rb.useGravity = true;
-                                rb.AddForce(Vector3.down * 5f); // Даём толчок вниз
-                                Debug.Log("Shotgun spawned with ID: " + droppedShotgun.GetInstanceID() + ", Active: " + droppedShotgun.activeSelf);
-                            }
-                            else
-                            {
-                                Debug.LogError("Rigidbody not found on shotgun prefab!");
-                            }
-                        }
-                        else
-                        {
-                            Debug.LogError("Failed to instantiate shotgun!");
-                        }
-                    }
-                    else
-                    {
-                        Debug.LogError("shotgunPickupPrefab not assigned!");
-                    }
+                    // Активируем дробовик в WeaponManager
+                    WeaponManager.Instance.isShotgunPurchased = true;
+                    WeaponManager.Instance.EquipWeapon(3); // Переключаем на дробовик
                 }
                 else
                 {
-                    sellerMessageText.text = "Not enough humanity!";
+                    sellerMessageText.text = "not enough humanity.";
                     Debug.Log("Not enough humanity to buy shotgun.");
                 }
                 break;
         }
-    }
-
-    public void SpawnShotgunDrop()
-    {
-        Vector3 spawnPos = playerTransform.position + Vector3.up * 5f; // 5 метров над игроком
-        Instantiate(shotgunPickupPrefab, spawnPos, Quaternion.identity);
     }
 
     void PlayClick()
